@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Dapper;
 using JN_ProyectoAPI.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using static System.Net.WebRequestMethods;
 
 namespace JN_ProyectoAPI.Controllers
 {
@@ -8,12 +11,27 @@ namespace JN_ProyectoAPI.Controllers
     [ApiController]
     public class HomeController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
+        public HomeController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
         [HttpPost]
-        [Route("IniciarSesion")]
-        public IActionResult IniciarSesion(UsuarioModel usuario)
+        [Route("Registro")]
+        public IActionResult Registro(UsuarioModel usuario)
         {
-            return Ok("HOLA");
+            using (var context = new SqlConnection(_configuration["ConnectionStrings:BDConnection"])) 
+            {
+                var parametros = new DynamicParameters();
+                parametros.Add("@Identificacion", usuario.Identificacion);
+                parametros.Add("@Nombre", usuario.Nombre);
+                parametros.Add("@CorreoElectronico", usuario.CorreoElectronico);
+                parametros.Add("@Contrasenna", usuario.Contrasenna);
+
+                var resultado = context.Execute("Registro", parametros);
+                return Ok(resultado);
+            }
         }
 
     }
