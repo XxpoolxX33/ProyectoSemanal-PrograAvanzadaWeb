@@ -1,6 +1,8 @@
-﻿namespace JN_ProyectoWeb.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace JN_ProyectoAPI.Models
 {
-    public class UsuarioModel
+    public class DatosUsuarioResponseModel
     {
         public int ConsecutivoUsuario { get; set; }
         public string Identificacion { get; set; } = string.Empty;
@@ -10,7 +12,5 @@
         public bool Estado { get; set; }
         public int ConsecutivoPerfil { get; set; }
         public string NombrePerfil { get; set; } = string.Empty;
-        public string ContrasennaConfirmar { get; set; } = string.Empty;
-
     }
 }

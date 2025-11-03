@@ -26,9 +26,26 @@ namespace JN_ProyectoWeb.Controllers
         [HttpPost]
         public IActionResult Index(UsuarioModel usuario)
         {
-            //ToDo: Validar si existe en la BD
+            using (var context = _http.CreateClient())
+            {
+                var urlApi = _configuration["Valores:UrlAPI"] + "Home/ValidarSesion";
+                var respuesta = context.PostAsJsonAsync(urlApi, usuario).Result;
 
-            return View();
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    var datosAPI = respuesta.Content.ReadFromJsonAsync<UsuarioModel>().Result;
+
+                    if (datosAPI != null)
+                    {
+                        HttpContext.Session.SetInt32("ConsecutivoUsuario", datosAPI.ConsecutivoUsuario);
+                        HttpContext.Session.SetString("NombreUsuario", datosAPI.Nombre);
+                        HttpContext.Session.SetString("NombrePerfil", datosAPI.NombrePerfil);
+                        return RedirectToAction("Principal", "Home");
+                    }
+                }
+                ViewBag.Mensaje = "No se ha validado la información";
+                return View();
+            }
         }
 
         #endregion
@@ -76,17 +93,40 @@ namespace JN_ProyectoWeb.Controllers
         [HttpPost]
         public IActionResult RecuperarAcceso(UsuarioModel usuario)
         {
-            //ToDo: validar la información del usuario en la BD y enviarle un correo
+            using (var context = _http.CreateClient())
+            {
+                var urlApi = _configuration["Valores:UrlAPI"] + "Home/ValidarUsuario?CorreoElectronico" + usuario.CorreoElectronico;
+                var respuesta = context.GetAsync(urlApi).Result;
 
-            return View();
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    var datosAPI = respuesta.Content.ReadFromJsonAsync<UsuarioModel>().Result;
+
+                    if (datosAPI != null)
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+                ViewBag.Mensaje = "No se ha recuperado el acceso";
+                return View();
+            }
         }
 
         #endregion
 
+        [Seguridad]
         [HttpGet]
         public IActionResult Principal()
         {
             return View();
+        }
+
+        [Seguridad]
+        [HttpGet]
+        public IActionResult CerrarSesion()
+        {
+            HttpContext.Session.Clear();
+            return View("Index","Home");
         }
     }
 }
