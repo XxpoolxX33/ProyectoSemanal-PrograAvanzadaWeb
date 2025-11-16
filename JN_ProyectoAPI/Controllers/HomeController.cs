@@ -1,17 +1,22 @@
 ﻿using Dapper;
 using JN_ProyectoAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Mail;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using static System.Net.WebRequestMethods;
 
 namespace JN_ProyectoAPI.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class HomeController : ControllerBase
@@ -55,11 +60,15 @@ namespace JN_ProyectoAPI.Controllers
                 var resultado = context.QueryFirstOrDefault<DatosUsuarioResponseModel>("ValidarSesion", parametros);
 
                 if (resultado != null)
+                {
+                    //JWT
+                    resultado.Token = GenerarToken(resultado.ConsecutivoUsuario, resultado.Nombre, resultado.ConsecutivoPerfil);
                     return Ok(resultado);
-
+                }
                 return NotFound();
             }
         }
+
 
         [HttpGet]
         [Route("ValidarUsuario")]
@@ -144,6 +153,29 @@ namespace JN_ProyectoAPI.Controllers
             };
 
             smtp.Send(mensaje);
+        }
+
+        private string GenerarToken(int usuarioId, string nombre, int rol)
+        {
+            var key = _configuration["Valores:KeyJWT"]!;
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim("id", usuarioId.ToString()),
+                new Claim("nombre", nombre),
+                new Claim("rol", rol.ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(30),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

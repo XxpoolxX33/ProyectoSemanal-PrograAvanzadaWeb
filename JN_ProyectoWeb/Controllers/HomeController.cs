@@ -40,6 +40,7 @@ namespace JN_ProyectoWeb.Controllers
                         HttpContext.Session.SetInt32("ConsecutivoUsuario", datosAPI.ConsecutivoUsuario);
                         HttpContext.Session.SetString("NombreUsuario", datosAPI.Nombre);
                         HttpContext.Session.SetString("NombrePerfil", datosAPI.NombrePerfil);
+                        HttpContext.Session.SetString("Token", datosAPI.Token);
                         return RedirectToAction("Principal", "Home");
                     }
                 }
