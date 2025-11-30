@@ -12,6 +12,7 @@ using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Utiles;
 using static System.Net.WebRequestMethods;
 
 namespace JN_ProyectoAPI.Controllers
@@ -76,6 +77,7 @@ namespace JN_ProyectoAPI.Controllers
         {
             using (var context = new SqlConnection(_configuration["ConnectionStrings:BDConnection"]))
             {
+                var helper = new Helper();
                 var parametros = new DynamicParameters();
                 parametros.Add("@CorreoElectronico", CorreoElectronico);
                 var resultado = context.QueryFirstOrDefault<DatosUsuarioResponseModel>("ValidarUsuario", parametros);
@@ -87,7 +89,7 @@ namespace JN_ProyectoAPI.Controllers
 
                     var parametrosActualizar = new DynamicParameters();
                     parametrosActualizar.Add("@ConsecutivoUsuario", resultado.ConsecutivoUsuario);
-                    parametrosActualizar.Add("@Contrasenna", ContrasennaGenerada);
+                    parametrosActualizar.Add("@Contrasenna", helper.Encrypt(ContrasennaGenerada));
                     var resultadoActualizar = context.Execute("ActualizarContrasenna", parametrosActualizar);
 
                     if (resultadoActualizar > 0)

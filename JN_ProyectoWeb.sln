@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36429.23 d17.14
+VisualStudioVersion = 17.14.36429.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JN_ProyectoWeb", "JN_ProyectoWeb\JN_ProyectoWeb.csproj", "{0D01A655-FA10-434B-87C7-8DCC136B2EBA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JN_ProyectoAPI", "JN_ProyectoAPI\JN_ProyectoAPI.csproj", "{9FADAA9B-183D-4AB7-AC83-F649C761F20F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utiles", "Utiles\Utiles.csproj", "{2E5B770E-4A5A-49A8-B14F-C1B951590470}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{9FADAA9B-183D-4AB7-AC83-F649C761F20F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9FADAA9B-183D-4AB7-AC83-F649C761F20F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FADAA9B-183D-4AB7-AC83-F649C761F20F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E5B770E-4A5A-49A8-B14F-C1B951590470}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E5B770E-4A5A-49A8-B14F-C1B951590470}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E5B770E-4A5A-49A8-B14F-C1B951590470}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E5B770E-4A5A-49A8-B14F-C1B951590470}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

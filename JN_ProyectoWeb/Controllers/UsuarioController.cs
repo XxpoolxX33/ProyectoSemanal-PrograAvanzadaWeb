@@ -1,6 +1,7 @@
 ﻿using JN_ProyectoWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
+using Utiles;
 using static System.Net.WebRequestMethods;
 
 namespace JN_ProyectoWeb.Controllers
@@ -16,6 +17,74 @@ namespace JN_ProyectoWeb.Controllers
             _http = http;
             _configuration = configuration;
         }
+
+        #region Empresa
+
+        [HttpGet]
+        public IActionResult Empresa()
+        {
+            using (var context = _http.CreateClient())
+            {
+                var consecutivo = HttpContext.Session.GetInt32("ConsecutivoUsuario");
+                var urlApi = _configuration["Valores:UrlAPI"] + "Usuario/ConsultarUsuario?ConsecutivoUsuario=" + consecutivo;
+                context.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+                var respuesta = context.GetAsync(urlApi).Result;
+
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    var datosApi = respuesta.Content.ReadFromJsonAsync<UsuarioModel>().Result;
+                    return View(datosApi);
+                }
+
+                ViewBag.Mensaje = "No hay información registrada";
+                return View(new UsuarioModel());
+            }
+        }
+
+        [HttpPost]
+        public IActionResult Empresa(UsuarioModel usuario, IFormFile ImagenComercial)
+        {
+            usuario.ImagenComercial = "/empresas/";
+            ViewBag.Mensaje = "La información no se ha actualizado correctamente";
+            usuario.ConsecutivoUsuario = (int)HttpContext.Session.GetInt32("ConsecutivoUsuario")!;
+
+            using (var context = _http.CreateClient())
+            {
+                var urlApi = _configuration["Valores:UrlAPI"] + "Usuario/ActualizarEmpresa";
+                context.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+                var respuesta = context.PutAsJsonAsync(urlApi, usuario).Result;
+
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    var datosApi = respuesta.Content.ReadFromJsonAsync<int>().Result;
+
+                    if (datosApi > 0)
+                    {
+                        if (ImagenComercial != null)
+                        {
+                            //save de la imagen
+                            string carpetaDestino = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "empresas");
+
+                            if (!Directory.Exists(carpetaDestino))
+                                Directory.CreateDirectory(carpetaDestino);
+
+                            string nombreArchivo = usuario.ConsecutivoUsuario + ".png";
+                            string rutaCompleta = Path.Combine(carpetaDestino, nombreArchivo);
+
+                            using var stream = new FileStream(rutaCompleta, FileMode.Create);
+                            ImagenComercial.CopyTo(stream);
+                        }
+
+                        ViewBag.Mensaje = "La información se ha actualizado correctamente";
+                    }
+                }
+
+                return View(usuario);
+            }
+        }
+
+        #endregion
+
         #region Perfil
         [HttpGet]
         public IActionResult Perfil()
@@ -78,6 +147,8 @@ namespace JN_ProyectoWeb.Controllers
         [HttpPost]
         public IActionResult Seguridad(UsuarioModel usuario)
         {
+            var helper = new Helper();
+            usuario.Contrasenna = helper.Encrypt(usuario.Contrasenna);
             ViewBag.Mensaje = "La información no se ha actualizado correctamente";
             usuario.ConsecutivoUsuario = (int)HttpContext.Session.GetInt32("ConsecutivoUsuario")!;
 

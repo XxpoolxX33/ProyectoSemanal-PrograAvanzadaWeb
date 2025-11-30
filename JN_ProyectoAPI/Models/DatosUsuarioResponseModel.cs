@@ -13,5 +13,7 @@ namespace JN_ProyectoAPI.Models
         public int ConsecutivoPerfil { get; set; }
         public string NombrePerfil { get; set; } = string.Empty;
         public string Token { get; set; } = string.Empty;
+        public string NombreComercial { get; set; } = string.Empty;
+        public string ImagenComercial { get; set; } = string.Empty;
     }
 }

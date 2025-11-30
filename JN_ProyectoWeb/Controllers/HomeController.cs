@@ -1,6 +1,8 @@
-using System.Diagnostics;
 using JN_ProyectoWeb.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using System.Net.Http.Headers;
+using Utiles;
 
 namespace JN_ProyectoWeb.Controllers
 {
@@ -26,6 +28,8 @@ namespace JN_ProyectoWeb.Controllers
         [HttpPost]
         public IActionResult Index(UsuarioModel usuario)
         {
+            var helper = new Helper();
+            usuario.Contrasenna = helper.Encrypt(usuario.Contrasenna);
             using (var context = _http.CreateClient())
             {
                 var urlApi = _configuration["Valores:UrlAPI"] + "Home/ValidarSesion";
@@ -33,17 +37,19 @@ namespace JN_ProyectoWeb.Controllers
 
                 if (respuesta.IsSuccessStatusCode)
                 {
-                    var datosAPI = respuesta.Content.ReadFromJsonAsync<UsuarioModel>().Result;
+                    var datosApi = respuesta.Content.ReadFromJsonAsync<UsuarioModel>().Result;
 
-                    if (datosAPI != null)
+                    if (datosApi != null)
                     {
-                        HttpContext.Session.SetInt32("ConsecutivoUsuario", datosAPI.ConsecutivoUsuario);
-                        HttpContext.Session.SetString("NombreUsuario", datosAPI.Nombre);
-                        HttpContext.Session.SetString("NombrePerfil", datosAPI.NombrePerfil);
-                        HttpContext.Session.SetString("Token", datosAPI.Token);
+                        HttpContext.Session.SetInt32("ConsecutivoUsuario", datosApi.ConsecutivoUsuario);
+                        HttpContext.Session.SetString("NombreUsuario", datosApi.Nombre);
+                        HttpContext.Session.SetString("NombrePerfil", datosApi.NombrePerfil);
+                        HttpContext.Session.SetInt32("ConsecutivoPerfil", datosApi.ConsecutivoPerfil);
+                        HttpContext.Session.SetString("Token", datosApi.Token);
                         return RedirectToAction("Principal", "Home");
                     }
                 }
+
                 ViewBag.Mensaje = "No se ha validado la información";
                 return View();
             }
@@ -62,6 +68,8 @@ namespace JN_ProyectoWeb.Controllers
         [HttpPost]
         public IActionResult Registro(UsuarioModel usuario)
         {
+            var helper = new Helper();
+            usuario.Contrasenna = helper.Encrypt(usuario.Contrasenna);
             using (var context = _http.CreateClient())
             {
                 var urlApi = _configuration["Valores:UrlAPI"] + "Home/Registro";
@@ -69,16 +77,15 @@ namespace JN_ProyectoWeb.Controllers
 
                 if (respuesta.IsSuccessStatusCode)
                 {
-                    var datosAPI = respuesta.Content.ReadFromJsonAsync<int>().Result;
+                    var datosApi = respuesta.Content.ReadFromJsonAsync<int>().Result;
 
-                    if (datosAPI > 0)
-                    {
+                    if (datosApi > 0)
                         return RedirectToAction("Index", "Home");
-                    }
                 }
+
                 ViewBag.Mensaje = "No se ha registrado la información";
                 return View();
-            } 
+            }
         }
 
         #endregion
@@ -119,7 +126,20 @@ namespace JN_ProyectoWeb.Controllers
         [HttpGet]
         public IActionResult Principal()
         {
-            return View();
+            using var context = _http.CreateClient();
+            var urlApi = _configuration["Valores:UrlAPI"] + "Usuario/ConsultarUsuarios";
+
+            context.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+            var respuesta = context.GetAsync(urlApi).Result;
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                var datosApi = respuesta.Content.ReadFromJsonAsync<List<UsuarioModel>>().Result;
+                return View(datosApi);
+            }
+
+            ViewBag.Mensaje = "No hay usuarios registrados";
+            return View(new List<UsuarioModel>());
         }
 
         [Seguridad]
