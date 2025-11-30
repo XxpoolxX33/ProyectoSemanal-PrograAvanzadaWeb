@@ -68,5 +68,19 @@ namespace JN_ProyectoAPI.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("CambiarEstado")]
+        public IActionResult CambiarEstado(CambiarEstadoProductoRequestModel producto)
+        {
+            using (var context = new SqlConnection(_configuration["ConnectionStrings:BDConnection"]))
+            {
+                var parametros = new DynamicParameters();
+                parametros.Add("@ConsecutivoProducto", producto.ConsecutivoProducto);
+
+                var resultado = context.Execute("CambiarEstadoProducto", parametros);
+                return Ok(resultado);
+            }
+        }
+
     }
 }

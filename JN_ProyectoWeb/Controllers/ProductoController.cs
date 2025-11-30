@@ -116,6 +116,30 @@ namespace JN_ProyectoWeb.Controllers
             }
         }
 
+        [HttpPost]
+
+        public IActionResult CambiarEstado(ProductoModel producto)
+        {
+            using (var context = _http.CreateClient())
+            {
+                var urlApi = _configuration["Valores:UrlAPI"] + "Producto/CambiarEstado";
+                context.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+                var respuesta = context.PutAsJsonAsync(urlApi, producto).Result;
+
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    var datosApi = respuesta.Content.ReadFromJsonAsync<int>().Result;
+
+                    if (datosApi > 0)
+                    {                     
+                        return RedirectToAction("ConsultarProductos", "Producto");
+                    }
+                }
+                ViewBag.Mensaje = "No se ha registrado la información";
+                return View();
+            }
+        }
+
         private List<ProductoModel>? ConsultarDatosProductos(int id)
         {
             using (var context = _http.CreateClient())
