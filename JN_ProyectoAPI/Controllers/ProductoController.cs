@@ -34,6 +34,21 @@ namespace JN_ProyectoAPI.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("ConsultarProductosTienda")]
+        public IActionResult ConsultarProductosTienda(int ConsecutivoProducto, int ConsecutivoUsuario)
+        {
+            using (var context = new SqlConnection(_configuration["ConnectionStrings:BDConnection"]))
+            {
+                var parametros = new DynamicParameters();
+                parametros.Add("@ConsecutivoProducto", ConsecutivoProducto);
+                parametros.Add("@ConsecutivoUsuario", ConsecutivoUsuario);
+
+                var resultado = context.Query<DatosProductoResponseModel>("ConsultarProductos", parametros);
+                return Ok(resultado);
+            }
+        }
+
         [HttpPost]
         [Route("AgregarProductos")]
         public IActionResult AgregarProductos(RegistroProductoRequestModel producto)
@@ -82,6 +97,23 @@ namespace JN_ProyectoAPI.Controllers
                 parametros.Add("@ConsecutivoUsuario", HttpContext.User.FindFirst("id")?.Value);
 
                 var resultado = context.Execute("CambiarEstadoProducto", parametros);
+                return Ok(resultado);
+            }
+        }
+
+        [HttpPost]
+        [Route("CalificarProducto")]
+        public IActionResult CalificarProducto(RegistroCalificacionRequestModel calificacion)
+        {
+            using (var context = new SqlConnection(_configuration["ConnectionStrings:BDConnection"]))
+            {
+                var parametros = new DynamicParameters();
+                parametros.Add("@ConsecutivoProducto", calificacion.ConsecutivoProducto);
+                parametros.Add("@RatingValue", calificacion.RatingValue);
+                parametros.Add("@Resenna", calificacion.Resenna);
+                parametros.Add("@ConsecutivoUsuario", HttpContext.User.FindFirst("id")?.Value);
+
+                var resultado = context.Execute("CalificarProducto", parametros);
                 return Ok(resultado);
             }
         }

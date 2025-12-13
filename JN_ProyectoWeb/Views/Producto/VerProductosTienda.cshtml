@@ -1,0 +1,87 @@
+﻿@model IEnumerable<ProductoModel>
+
+@{
+    Layout = "_LayoutInterno";
+}
+
+<div class="mt-4">
+
+    @if (ViewBag.Mensaje != null)
+    {
+        <div class="alert alert-primary text-center">
+            @ViewBag.Mensaje
+        </div>
+    }
+
+
+    <h4 class="text-center mb-4">
+        <a asp-action="Principal" asp-controller="Home">Tiendas > </a>
+        @Model.FirstOrDefault()!.NombreComercial
+    </h4>
+
+    <div class="container">
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                    <div class="card tienda-card h-70 shadow-sm">
+                        <img class="card-img-top"
+                             src="@($"{item.Imagen}{item.ConsecutivoProducto}.png")"
+                             onerror="this.src='/img/default.png'"
+                             style="object-fit:contain;" />
+
+                        <div class="card-body-images text-center">
+                            <h6 class="card-title mb-2">Producto: @item.Nombre</h6>
+                            <h6 class="card-title mb-2">Detalle: @item.Descripcion</h6>
+                            <h6 class="card-title mb-2">Precio: $@item.Precio.ToString("N2")</h6>
+
+                            <div class="text-center mt-3">
+                                <button class="btn btn-primary"
+                                        data-id="@item.ConsecutivoProducto"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#ratingModal">
+                                    Calificar servicio
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ratingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Calificar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-2">Selecciona tu calificación</p>
+
+                <div id="stars" class="mb-3">
+                    <i class="bi bi-star star" data-value="1" tabindex="0" aria-label="1 estrella"></i>
+                    <i class="bi bi-star star" data-value="2" tabindex="0" aria-label="2 estrellas"></i>
+                    <i class="bi bi-star star" data-value="3" tabindex="0" aria-label="3 estrellas"></i>
+                </div>
+
+                <input type="hidden" id="ratingValue" value="">
+                <div><small id="ratingText" class="text-muted"></small></div>
+
+                <input type="hidden" id="ConsecutivoProducto" name="ConsecutivoProducto">
+                <textarea id="txtResenna" style="resize:none" rows="5" class="form-control"></textarea>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="sendRating" class="btn btn-primary">Procesar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/ConsultarProductosTienda.js" asp-append-version="true"></script>

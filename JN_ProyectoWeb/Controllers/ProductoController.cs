@@ -117,7 +117,6 @@ namespace JN_ProyectoWeb.Controllers
         }
 
         [HttpPost]
-
         public IActionResult CambiarEstado(ProductoModel producto)
         {
             using (var context = _http.CreateClient())
@@ -131,7 +130,7 @@ namespace JN_ProyectoWeb.Controllers
                     var datosApi = respuesta.Content.ReadFromJsonAsync<int>().Result;
 
                     if (datosApi > 0)
-                    {                     
+                    {
                         return RedirectToAction("ConsultarProductos", "Producto");
                     }
                 }
@@ -140,11 +139,56 @@ namespace JN_ProyectoWeb.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult VerProductosTienda(int id)
+        {
+            var respuesta = ConsultarDatosProductosTienda(0, id);
+            return View(respuesta);
+        }
+
+        [HttpPost]
+        public JsonResult Calificar(string ratingValue, string resenna, int consecutivoProducto)
+        {
+            using (var context = _http.CreateClient())
+            {
+                var calificacion = new CalificacionModel
+                {
+                    RatingValue = int.Parse(ratingValue),
+                    Resenna = resenna ?? string.Empty,
+                    ConsecutivoProducto = consecutivoProducto
+                };
+
+                var urlApi = _configuration["Valores:UrlAPI"] + "Producto/CalificarProducto";
+                context.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+                var respuesta = context.PostAsJsonAsync(urlApi, calificacion).Result;
+                return Json("ok");
+            }
+        }
+
         private List<ProductoModel>? ConsultarDatosProductos(int id)
         {
             using (var context = _http.CreateClient())
             {
-                var urlApi = _configuration["Valores:UrlAPI"] + "Producto/ConsultarProductos?ConsecutivoProducto=0";
+                var urlApi = _configuration["Valores:UrlAPI"] + "Producto/ConsultarProductos?ConsecutivoProducto=" + id;
+                context.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+                var respuesta = context.GetAsync(urlApi).Result;
+
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    var datosApi = respuesta.Content.ReadFromJsonAsync<List<ProductoModel>>().Result;
+                    return datosApi;
+                }
+
+                ViewBag.Mensaje = "No hay productos registrados";
+                return new List<ProductoModel>();
+            }
+        }
+
+        private List<ProductoModel>? ConsultarDatosProductosTienda(int ConsecutivoProducto, int ConsecutivoUsuario)
+        {
+            using (var context = _http.CreateClient())
+            {
+                var urlApi = _configuration["Valores:UrlAPI"] + $"Producto/ConsultarProductosTienda?ConsecutivoProducto={ConsecutivoProducto}&ConsecutivoUsuario={ConsecutivoUsuario}";
                 context.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
                 var respuesta = context.GetAsync(urlApi).Result;
 
