@@ -1,4 +1,5 @@
 using JN_ProyectoWeb.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Net.Http.Headers;
@@ -126,6 +127,11 @@ namespace JN_ProyectoWeb.Controllers
         [HttpGet]
         public IActionResult Principal()
         {
+            if (HttpContext.Session.GetInt32("ConsecutivoPerfil") == 1) 
+            {
+                return RedirectToAction("Principal", "Admin");
+            }
+
             using var context = _http.CreateClient();
             var urlApi = _configuration["Valores:UrlAPI"] + "Usuario/ConsultarUsuarios";
 
